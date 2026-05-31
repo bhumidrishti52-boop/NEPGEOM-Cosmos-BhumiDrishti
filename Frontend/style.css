@@ -419,3 +419,135 @@ header {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5);
 }
+
+#chat-panel {
+    margin-top: 16px;
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+#chat-panel h3 { margin: 0 0 12px; font-size: 1rem; color: #111827; }
+
+#chat-messages {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-msg {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    max-width: 90%;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
+}
+
+.bot-msg  { background: white; color: #374151; border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; }
+.user-msg { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.typing-msg { background: white; border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; color: #9ca3af; font-style: italic; }
+
+.chat-input-row { display: flex; gap: 8px; }
+
+#chat-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#chat-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-send {
+    width: 42px; height: 42px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-send:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+
+/* Success toast */
+#success-popup {
+    display: none;
+    position: fixed;
+    top: 20px; right: 20px;
+    background: #16a34a;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 2000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);   opacity: 1; }
+}
+
+
+#report-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    width: 80%;
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 24px;
+    border-radius: 12px;
+    max-height: 80%;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Map control overrides */
+.mapboxgl-ctrl-group {
+    border: 2px solid var(--primary) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 12px;
+    }
+
+    #sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+
+    #content { flex-direction: column; }
+
+    .btn { padding: 8px 12px; font-size: 13px; }
+}
