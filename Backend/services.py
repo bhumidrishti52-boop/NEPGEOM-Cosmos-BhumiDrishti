@@ -171,3 +171,90 @@ def run_spatial_analysis(geometry_dict: dict) -> dict:
         and ls_mean < 0.04
         and agri_mean == 0.0
     )
+
+    output = {
+        # ─── Asset provenance ────────────────────────────────────
+        'source': ASSET_ID,
+        'asset_version': 'Bhumi_Full_Production_Final',
+
+        # ─── Confidence / buffer metadata ────────────────────────
+        'confidence':   confidence,
+        'buffer_tier':  buffer_tier,
+        'buffer_m':     buffer_m,
+        'area_m2':      round(area_m2, 1),
+        'null_imputed': sorted(_null_imputed_set),
+        'outside_roi':  outside_roi,
+        'anomaly_flag': anomaly_flag,
+
+        # ─── Risk scores (raw 0-1 probabilities) ─────────────────
+        'flood_prob': {
+            'mean': flood_mean,
+            'max':  flood_max,
+        },
+        'landslide_risk': {
+            'mean': ls_mean,
+            'max':  ls_max,
+        },
+        'agri_prob': {
+            'mean': agri_mean,
+            'max':  agri_max,
+        },
+
+        # ─── Terrain ─────────────────────────────────────────────
+        'slope': {
+            'mean': slope_mean,
+            'max':  slope_max,
+        },
+        'elevation': {
+            'mean': elev_mean,
+            'min':  elev_min,
+            'max':  elev_max,
+        },
+        'slope_std':  slope_std,
+        'curvature':  curvature,
+
+        # ─── Hydrology ───────────────────────────────────────────
+        'twi': {
+            'mean': twi_mean,
+        },
+        'spi': {
+            'mean':           spi_mean,
+            'interpretation': _spi_interpretation(spi_mean),
+        },
+        'dist_river': {
+            'log_value':      dist_river_log,
+            'metres':         dist_river_m,
+        },
+        'flow_acc_log': flow_acc_log,
+
+        # ─── Vegetation ──────────────────────────────────────────
+        # NDVI raw is suppressed from user output per contract rule 6
+        'vegetation': {
+            'ndvi_raw':          ndvi_raw,   # internal only — do NOT expose to users
+            'ndvi_wet':          ndvi_wet,
+            'ndvi_delta':        ndvi_delta,
+            'ndvi_non_informative': True,    # flag for ai_summary / pdf
+        },
+
+        # ─── Climate ─────────────────────────────────────────────
+        'rainfall': {
+            'annual_mm': rain_mean,
+        },
+
+        # ─── Soil ─────────────────────────────────────────────────
+        'soil_clay': {
+            'raw_g_per_kg': soil_clay_raw,
+            'percentage':   round(soil_clay_pct, 2),
+        },
+
+        # ─── Land use ────────────────────────────────────────────
+        'lulc': {
+            'code':  lulc_code,
+            'label': _lulc_label(lulc_code),
+        },
+    }
+
+    print(f"DEBUG: confidence={confidence}, buffer_tier={buffer_tier}, "
+          f"flood={flood_mean:.3f}, ls={ls_mean:.3f}, agri={agri_mean:.3f}, "
+          f"anomaly={anomaly_flag}, outside_roi={outside_roi}")
+    return output
