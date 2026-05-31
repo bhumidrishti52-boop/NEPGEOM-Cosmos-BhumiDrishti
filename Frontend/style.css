@@ -288,7 +288,6 @@ header {
 }
 
 #summary-content p      { margin-bottom: 12px; }
-<<<<<<< HEAD
 #summary-content strong { color: #2c3e50; }
 
 
@@ -552,6 +551,3 @@ header {
 
     .btn { padding: 8px 12px; font-size: 13px; }
 }
-=======
-#summary-content strong { color: #2c3e50; }
->>>>>>> origin/feat/map-init
