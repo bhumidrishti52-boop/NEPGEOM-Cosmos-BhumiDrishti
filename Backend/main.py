@@ -38,6 +38,9 @@ def _pct(v: float) -> float:
 
 @app.post("/analyze-plot")
 async def analyze(request: AnalysisRequest):
+    try:
+        # ── 1. Coordinate Check (Pre-GEE) ──────────────────────────────
+        # Supported bounds: lon: 86.5 to 88.5, lat: 26.2 to 27.5
         try:
             coords = request.geometry.get('coordinates', [])[0]
             avg_lon = sum(c[0] for c in coords) / len(coords)
@@ -49,7 +52,9 @@ async def analyze(request: AnalysisRequest):
                     "error": "This location is outside our current coverage area. Bhumi Drishti currently supports land analysis in Sunsari and surrounding Terai districts of Nepal only."
                 }
         except:
-            pass 
+            pass # Fallback to GEE check if geometry structure is unusual
+
+        # ── 2. Fetch GEE Stats ─────────────────────────────────────────
         stats = run_spatial_analysis(request.geometry)
 
         if not stats or stats.get('outside_roi'):
@@ -59,6 +64,8 @@ async def analyze(request: AnalysisRequest):
                 "error": "This location is outside our current coverage area. Bhumi Drishti currently supports land analysis in Sunsari and surrounding Terai districts of Nepal only."
             }
 
+        # ── 3. Data Integrity Check (Post-GEE) ─────────────────────────
+        # If all core risk bands were missing and imputed with medians, it's outside ROI
         imputed = stats.get('null_imputed', [])
         core_risks_missing = all(x in imputed for x in ['flood_risk', 'landslide_risk', 'agri_suitability'])
         
@@ -69,8 +76,10 @@ async def analyze(request: AnalysisRequest):
                 "error": "Insufficient raster data found for this plot. This location is outside our high-resolution coverage area."
             }
 
+        # Generate AI risk summary (uses full data dict)
         risk_summary_text = generate_risk_summary(stats)
 
+        # Convenience accessors
         def gs(category, metric, default=0):
             return stats.get(category, {}).get(metric, default)
 
@@ -80,6 +89,7 @@ async def analyze(request: AnalysisRequest):
         anomaly     = stats.get('anomaly_flag', False)
         outside_roi = stats.get('outside_roi', False)
 
+        # ── Terrain Classification & Risk Logic ────────────────────────
         slope_mean = gs('slope', 'mean')
         terrain_type = "FLAT" if slope_mean < 5 else "SLOPED"
 
@@ -110,4 +120,85 @@ async def analyze(request: AnalysisRequest):
                 "sub_note":  "Represents the highest-risk point within the plot boundary, not the entire land."
             })
 
-            
+        # Build the response payload
+        response_payload = {
+            "metadata": {
+                "source":       stats.get('asset_version', 'Bhumi_Full_Production_Final'),
+                "confidence":   confidence,
+                "buffer_tier":  buffer_tier,
+                "buffer_m":     buffer_m,
+                "area_m2":      stats.get('area_m2', None),
+                "null_imputed": stats.get('null_imputed', []),
+                "anomaly_flag": anomaly,
+                "outside_roi":  outside_roi,
+                "terrain_type": terrain_type,
+                "note": (
+                    "Score derived from a 60 m buffer around the plot centroid. "
+                    "The parcel is smaller than one 30 m satellite pixel. Results are indicative only; "
+                    "on-site verification is recommended before any land-use decision."
+                    if confidence == "LOW" else
+                    "Analysis based on Bhumi_Full_Production_Final GEE asset (30 m resolution)."
+                ),
+            },
+            "quantitative_data": {
+                "indicators": [
+                    {
+                        "category":  "flood",
+                        "title":     "Flood Risk",
+                        "value":     _pct(gs('flood_prob', 'mean')),
+                        "sub_value": _pct(gs('flood_prob', 'max')),
+                        "sub_label": "Peak Risk",
+                        "unit":      "%",
+                    },
+                    ls_display,
+                    {
+                        "category":  "agri",
+                        "title":     "Agricultural Suitability",
+                        "value":     _pct(gs('agri_prob', 'mean')),
+                        "sub_value": _pct(gs('agri_prob', 'max')),
+                        "sub_label": "Peak Suitability",
+                        "unit":      "%",
+                    },
+                ],
+                "details": {
+                    # Terrain
+                    "slope":          gs('slope', 'mean'),
+                    "elevation":      gs('elevation', 'mean'),
+                    "slope_std":      stats.get('slope_std', 0),
+                    "curvature":      stats.get('curvature', 0),
+
+                    # LULC
+                    "lulc":           stats.get('lulc', {}).get('label', 'Unknown'),
+                    "lulc_code":      stats.get('lulc', {}).get('code', None),
+
+                    # Vegetation — NDVI raw intentionally omitted per contract
+                    "ndvi_wet":       gs('vegetation', 'ndvi_wet'),
+                    "ndvi_delta":     gs('vegetation', 'ndvi_delta'),
+                    "ndvi_note":      "vegetation index data not discriminating in this area; ndvi_wet and ndvi_delta used by model instead.",
+
+                    # Soil
+                    "soil_clay_pct":  stats.get('soil_clay', {}).get('percentage', 0),
+
+                    # Climate
+                    "rainfall":       gs('rainfall', 'annual_mm'),
+
+                    # Hydrology
+                    "twi":            gs('twi', 'mean'),
+                    "spi":            gs('spi', 'mean'),
+                    "spi_label":      stats.get('spi', {}).get('interpretation', ''),
+                    "dist_river_m":   stats.get('dist_river', {}).get('metres', None),
+                    "flow_acc_log":   stats.get('flow_acc_log', 0),
+                },
+                "risk_summary": risk_summary_text,
+            },
+            # Full raw stats forwarded for PDF / Chat reuse
+            "raw_stats": stats,
+        }
+
+        print(f"DEBUG: Response payload confidence={confidence}, anomaly={anomaly}")
+        return response_payload
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
