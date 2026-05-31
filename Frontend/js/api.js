@@ -187,6 +187,51 @@ function renderResults(data) {
             }
         }
 
+        // ── Technical Details ───────────────────────────────────────
+        const details = qd.details || {};
+        const safeNum = (v, decimals, suffix) => {
+            if (v == null || isNaN(v)) return '--' + (suffix || '');
+            return v.toFixed(decimals) + (suffix || '');
+        };
+
+        document.getElementById('tech-slope').innerText   = safeNum(details.slope, 1, '°');
+        document.getElementById('tech-elev').innerText    = safeNum(details.elevation, 0, ' m');
+        document.getElementById('tech-lulc').innerText    = details.lulc || 'Unknown';
+
+        // NDVI — show ndvi_wet and ndvi_delta, never raw NDVI
+        const ndviEl = document.getElementById('tech-ndvi');
+        const ndviSub = document.getElementById('tech-ndvi-sub');
+        if (ndviEl) {
+            if (details.ndvi_wet != null) {
+                ndviEl.innerText = `${details.ndvi_wet.toFixed(3)} / ${(details.ndvi_delta||0).toFixed(3)}`;
+                if (ndviSub) ndviSub.style.display = 'block';
+            } else {
+                ndviEl.innerText = 'non-informative';
+                if (ndviSub) ndviSub.style.display = 'none';
+            }
+        }
+
+        // Soil clay already in % from backend
+        document.getElementById('tech-clay').innerText  = safeNum(details.soil_clay_pct, 1, '%');
+        document.getElementById('tech-rain').innerText  = safeNum(details.rainfall_mm, 0, ' mm');
+        document.getElementById('tech-twi').innerText   = safeNum(details.twi, 2);
+        document.getElementById('tech-spi').innerText   = safeNum(details.spi, 2);
+        document.getElementById('tech-river').innerText = safeNum(details.river_dist_m, 0, ' m');
+
+        // ── Risk Summary ────────────────────────────────────────────
+        const rawSummary = qd.risk_summary || 'No summary available.';
+        const cleanSummary = rawSummary.replace(/\*\*/g, '');
+        document.getElementById('summary-content').innerText = cleanSummary;
+
+        // Reset payment state for new plot
+        window.isPlotUnlocked = false;
+        const unlockBtn = document.getElementById('btn-unlock-premium');
+        if (unlockBtn) unlockBtn.style.display = 'block';
+        const unlockedDiv = document.getElementById('unlocked-buttons');
+        if (unlockedDiv) unlockedDiv.style.display = 'none';
+
+        closePaywall();
+
     } catch (err) {
         console.error('renderResults error:', err);
         document.getElementById('summary-content').innerText = '⚠️ Error displaying results.';
