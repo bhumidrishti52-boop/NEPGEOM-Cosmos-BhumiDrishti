@@ -1,9 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 import os
 import ee
+from models import AnalysisRequest
+from services import run_spatial_analysis
+
 from fastapi.staticfiles import StaticFiles
 
 app=FastAPI()
@@ -28,3 +32,51 @@ class ChatRequest(BaseModel):
 
 class ReportRequest(BaseModel):
     analysis_data: dict
+
+def _pct(v: float) -> float:
+    return round(v * 100, 1)
+
+@app.post("/analyze-plot")
+async def analyze(request: AnalysisRequest):
+    try:
+        try:
+            coords = request.geometry.get('coordinates', [])[0]
+            avg_lon = sum(c[0] for c in coords) / len(coords)
+            avg_lat = sum(c[1] for c in coords) / len(coords)
+            if not (86.5 <= avg_lon <= 88.5 and 26.2 <= avg_lat <= 27.5):
+                return {
+                    "outside_roi": True,
+                    "confidence": "NONE",
+                    "error": "This location is outside our current coverage area. Bhumi Drishti currently supports land analysis in Sunsari and surrounding Terai districts of Nepal only."
+                }
+        except:
+            pass 
+        stats = run_spatial_analysis(request.geometry)
+
+        if not stats or stats.get('outside_roi'):
+            return {
+                "outside_roi": True,
+                "confidence": "NONE",
+                "error": "This location is outside our current coverage area. Bhumi Drishti currently supports land analysis in Sunsari and surrounding Terai districts of Nepal only."
+            }
+
+        imputed = stats.get('null_imputed', [])
+        core_risks_missing = all(x in imputed for x in ['flood_risk', 'landslide_risk', 'agri_suitability'])
+        
+        if core_risks_missing:
+            return {
+                "outside_roi": True,
+                "confidence": "NONE",
+                "error": "Insufficient raster data found for this plot. This location is outside our high-resolution coverage area."
+            }
+
+        risk_summary_text = generate_risk_summary(stats)
+
+        def gs(category, metric, default=0):
+            return stats.get(category, {}).get(metric, default)
+
+        confidence  = stats.get('confidence', 'UNKNOWN')
+        buffer_tier = stats.get('buffer_tier', 0)
+        buffer_m    = stats.get('buffer_m', 0)
+        anomaly     = stats.get('anomaly_flag', False)
+        outside_roi = stats.get('outside_roi', False)
