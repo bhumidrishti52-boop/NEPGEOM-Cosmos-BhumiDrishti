@@ -87,3 +87,60 @@ def generate_pdf_report(analysis_data: dict) -> io.BytesIO:
     indicators = qd.get('indicators', [])
     details = qd.get('details', {})
     risk_summary = qd.get('risk_summary', 'No summary available.')
+
+    def get_indicator(cat):
+        for ind in indicators:
+            if ind.get('category') == cat:
+                return ind
+        return {'value': 0, 'sub_value': 0}
+
+    flood = get_indicator('flood')
+    landslide = get_indicator('landslide')
+    agri = get_indicator('agri')
+
+    # --- RISK OVERVIEW ---
+    elements.append(Paragraph("Risk Overview", heading_style))
+
+    risk_data = [
+        ['Category', 'Average Risk', 'Peak Risk', 'Assessment'],
+        [
+            'Flood Risk',
+            f"{flood.get('value', 0):.0f}%",
+            f"{flood.get('sub_value', 0):.0f}%",
+            _risk_label(flood.get('value', 0))
+        ],
+        [
+            'Landslide Risk',
+            f"{landslide.get('value', 0):.0f}%",
+            f"{landslide.get('sub_value', 0):.0f}%",
+            _risk_label(landslide.get('value', 0))
+        ],
+        [
+            'Agri Suitability',
+            f"{agri.get('value', 0):.0f}%",
+            '--',
+            _agri_label(agri.get('value', 0))
+        ],
+    ]
+
+    risk_table = Table(risk_data, colWidths=[100, 85, 75, 100])
+    risk_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#2563eb')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#ffffff')),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#d1d5db')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor('#f9fafb'), HexColor('#ffffff')]),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(risk_table)
+    elements.append(Spacer(1, 6))
+
+    elements.append(Paragraph(
+        "<i>Peak values represent the worst-case scenario found at any point within your plot boundary. "
+        "They indicate localized hotspots where risk is highest.</i>",
+        ParagraphStyle('Note', parent=body_style, fontSize=9, textColor=HexColor('#6b7280'))
+    ))
