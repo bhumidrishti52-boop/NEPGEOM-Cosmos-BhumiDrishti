@@ -105,3 +105,15 @@ def run_spatial_analysis(geometry_dict: dict) -> dict:
         return {}
 
     print(f"DEBUG: Raw GEE stats keys: {list(stats.keys())}")
+
+    try:
+        lulc_mode_result = image.select('lulc').reduceRegion(
+            reducer=ee.Reducer.mode(),
+            geometry=geom_analysis,
+            scale=30,
+            maxPixels=1e8,
+            bestEffort=True,
+        ).getInfo()
+        lulc_code = int(lulc_mode_result.get('lulc') or BAND_MEDIANS['lulc'])
+    except Exception:
+        lulc_code = int(BAND_MEDIANS['lulc'])
