@@ -1,7 +1,6 @@
-// Update this URL if deploying or using a different tunnel
 const BACKEND_URL = '/analyze-plot';
 
-// Track the latest geometry drawn so we can re-request analysis
+
 let lastGeometry = null;
 
 // UI Helper Functions
@@ -187,8 +186,245 @@ function renderResults(data) {
             }
         }
 
+        // ── Technical Details ───────────────────────────────────────
+        const details = qd.details || {};
+        const safeNum = (v, decimals, suffix) => {
+            if (v == null || isNaN(v)) return '--' + (suffix || '');
+            return v.toFixed(decimals) + (suffix || '');
+        };
+
+        document.getElementById('tech-slope').innerText   = safeNum(details.slope, 1, '°');
+        document.getElementById('tech-elev').innerText    = safeNum(details.elevation, 0, ' m');
+        document.getElementById('tech-lulc').innerText    = details.lulc || 'Unknown';
+
+        // NDVI — show ndvi_wet and ndvi_delta, never raw NDVI
+        const ndviEl = document.getElementById('tech-ndvi');
+        const ndviSub = document.getElementById('tech-ndvi-sub');
+        if (ndviEl) {
+            if (details.ndvi_wet != null) {
+                ndviEl.innerText = `${details.ndvi_wet.toFixed(3)} / ${(details.ndvi_delta||0).toFixed(3)}`;
+                if (ndviSub) ndviSub.style.display = 'block';
+            } else {
+                ndviEl.innerText = 'non-informative';
+                if (ndviSub) ndviSub.style.display = 'none';
+            }
+        }
+
+        // Soil clay already in % from backend
+        document.getElementById('tech-clay').innerText  = safeNum(details.soil_clay_pct, 1, '%');
+        document.getElementById('tech-rain').innerText  = safeNum(details.rainfall_mm, 0, ' mm');
+        document.getElementById('tech-twi').innerText   = safeNum(details.twi, 2);
+        document.getElementById('tech-spi').innerText   = safeNum(details.spi, 2);
+        document.getElementById('tech-river').innerText = safeNum(details.river_dist_m, 0, ' m');
+
+        // ── Risk Summary ────────────────────────────────────────────
+        const rawSummary = qd.risk_summary || 'No summary available.';
+        const cleanSummary = rawSummary.replace(/\*\*/g, '');
+        document.getElementById('summary-content').innerText = cleanSummary;
+
+        // Reset payment state for new plot
+        window.isPlotUnlocked = false;
+        const unlockBtn = document.getElementById('btn-unlock-premium');
+        if (unlockBtn) unlockBtn.style.display = 'block';
+        const unlockedDiv = document.getElementById('unlocked-buttons');
+        if (unlockedDiv) unlockedDiv.style.display = 'none';
+
+        closePaywall();
+
     } catch (err) {
         console.error('renderResults error:', err);
         document.getElementById('summary-content').innerText = '⚠️ Error displaying results.';
     }
 }
+
+// ----------------------
+// Store last analysis data for PDF/Chat
+// ----------------------
+let lastAnalysisData = null;
+let lastRawStats = null;
+
+// ----------------------
+// PDF Download
+// ----------------------
+async function downloadReport() {
+    if (!lastAnalysisData) {
+        alert('Please analyze a plot first.');
+        return;
+    }
+
+    // Gated Check
+    if (!window.isPlotUnlocked) {
+        showPaywall('report');
+        return;
+    }
+
+    const btn = document.getElementById('btn-download-report');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">Generating PDF...</span>';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ analysis_data: lastAnalysisData })
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bhumi_drishti_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.innerHTML = '<span class="btn-icon">✅</span><span class="btn-label">Downloaded!</span>';
+        setTimeout(() => { btn.innerHTML = origHTML; btn.disabled = false; }, 2000);
+
+    } catch (err) {
+        console.error('PDF download error:', err);
+        alert('⚠️ Failed to generate report.');
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
+
+// ----------------------
+// Chat About Land — Paywall
+// ----------------------
+function openChat() {
+    if (!lastAnalysisData) {
+        alert('Please analyze a plot first.');
+        return;
+    }
+
+    // Gated Check
+    if (!window.isPlotUnlocked) {
+        showPaywall('chat');
+        return;
+    }
+
+    document.getElementById('chat-panel').style.display = 'block';
+    document.getElementById('chat-input').focus();
+}
+
+function showPaywall(feature) {
+    const modal = document.getElementById('paywall-modal');
+    modal.style.display = 'flex';
+
+    const title = document.querySelector('.paywall-card h2');
+    const desc = document.querySelector('.paywall-desc');
+
+    if (feature === 'report') {
+        title.innerText = "Unlock Detailed Report";
+        desc.innerText = "Get a comprehensive Due Diligence PDF report for this specific plot.";
+    } else if (feature === 'chat') {
+        title.innerText = "Chat About This Plot";
+        desc.innerText = "Ask unlimited questions about risks and potential for this specific plot.";
+    } else {
+        // "premium" or default
+        title.innerText = "Unlock Premium Features";
+        desc.innerText = "Get a detailed Due Diligence Report (PDF) AND unlimited AI Chat for this specific plot.";
+    }
+}
+
+function closePaywall() {
+    document.getElementById('paywall-modal').style.display = 'none';
+}
+
+function processPayment() {
+    // Mock payment flow
+    const payBtn = document.querySelector('.btn-pay');
+    payBtn.innerHTML = '⏳ Processing...';
+    payBtn.disabled = true;
+
+    setTimeout(() => {
+        // Unlock THIS plot
+        window.isPlotUnlocked = true;
+
+        document.getElementById('paywall-modal').style.display = 'none';
+
+        // Update UI: Hide "Unlock", Show "Action" buttons
+        const unlockBtn = document.getElementById('btn-unlock-premium');
+        if (unlockBtn) unlockBtn.style.display = 'none';
+
+        const unlockedDiv = document.getElementById('unlocked-buttons');
+        if (unlockedDiv) unlockedDiv.style.display = 'flex'; // or block
+
+        // Reset pay button for future
+        payBtn.innerHTML = '💳 Pay & Unlock (Rs 1500)';
+        payBtn.disabled = false;
+
+        alert("Payment Successful! Features unlocked for this plot.");
+
+        // Auto-open chat if they were trying to chat? Or let them click?
+        // Just let them click.
+    }, 1500);
+}
+
+// ----------------------
+// Chat Messaging
+// ----------------------
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const messagesEl = document.getElementById('chat-messages');
+
+    // Add user message
+    const userDiv = document.createElement('div');
+    userDiv.className = 'chat-msg user-msg';
+    userDiv.textContent = question;
+    messagesEl.appendChild(userDiv);
+
+    input.value = '';
+
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-msg typing-msg';
+    typingDiv.textContent = 'Thinking...';
+    messagesEl.appendChild(typingDiv);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    try {
+        const response = await fetch('/chat-land', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: question,
+                land_data: lastRawStats || {}
+            })
+        });
+
+        const data = await response.json();
+
+        // Replace typing with answer
+        typingDiv.className = 'chat-msg bot-msg';
+        typingDiv.textContent = data.answer || 'Sorry, I could not generate a response.';
+
+    } catch (err) {
+        console.error('Chat error:', err);
+        typingDiv.className = 'chat-msg bot-msg';
+        typingDiv.textContent = '⚠️ Error getting response. Please try again.';
+    }
+
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// ----------------------
+// Expose functions for other modules
+// ----------------------
+window.resetUI = function () {
+    showPanel('instructions-panel');
+    document.getElementById('chat-panel').style.display = 'none';
+};
+window.downloadReport = downloadReport;
+window.openChat = openChat;
+window.closePaywall = closePaywall;
+window.processPayment = processPayment;
+window.sendChatMessage = sendChatMessage;

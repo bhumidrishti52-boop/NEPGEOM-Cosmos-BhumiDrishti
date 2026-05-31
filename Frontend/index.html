@@ -27,194 +27,158 @@
 
     <div id="content">
         <div id="map"></div>
-        
+        <div id="sidebar">
 
-<div id="sidebar">
-
-    
-    <div id="instructions-panel" class="panel active">
-        <h2><i class="fas fa-map-marked-alt"></i> How to Analyze</h2>
-        <div class="step-card">
-            <div class="step-icon">1</div>
-            <div class="step-text">Click <strong>Draw Plot Boundaries</strong> to start.</div>
-        </div>
-        <div class="step-card">
-            <div class="step-icon">2</div>
-            <div class="step-text">Click points on the map to outline your land.</div>
-        </div>
-        <div class="step-card">
-            <div class="step-icon">3</div>
-            <div class="step-text"><strong>Double-click</strong> to finish and start analysis.</div>
-        </div>
-    </div>
-    <!-- 2. LOADING PANEL -->
-<div id="loading-panel" class="panel">
-    <div class="loader-container">
-        <div class="spinner"></div>
-        <h3>Analyzing Satellite Images</h3>
-        <div id="loading-factors">
-            <p><i class="fas fa-water"></i> Analyzing flood probability...</p>
-            <p><i class="fas fa-mountain"></i> Calculating landslide risk...</p>
-            <p><i class="fas fa-leaf"></i> Measuring vegetation health...</p>
-        </div>
-    </div>
-</div>
-
-
-<!-- 3. RESULTS PANEL — risk cards section -->
-<div id="results-panel" class="panel">
-    <h2>Analysis Results</h2>
-    <div id="location-badge" class="badge">Sunsari District · Bhumi_Full_Production_Final</div>
-    <div id="confidence-badge" class="confidence-badge">-- confidence</div>
-
-    <!-- Warning banner -->
-    <div id="warning-banner" class="warning-banner" style="display:none;"></div>
-
-    <!-- Main Risk Cards -->
-    <div class="risk-grid">
-        <div class="risk-card" id="card-flood">
-            <div class="card-icon"><i class="fas fa-water"></i></div>
-            <div class="card-data">
-                <span class="card-title">FLOOD</span>
-                <span class="card-value" id="val-flood">--%</span>
-                <span class="card-sub"><span id="label-flood">Peak</span> <span id="peak-flood">--%</span></span>
+            <!-- 1. INSTRUCTIONS PANEL -->
+            <div id="instructions-panel" class="panel active">
+                <h2><i class="fas fa-map-marked-alt"></i> How to Analyze</h2>
+                <div class="step-card">
+                    <div class="step-icon">1</div>
+                    <div class="step-text">Click <strong>Draw Plot Boundaries</strong> to start.</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon">2</div>
+                    <div class="step-text">Click points on the map to outline your land.</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon">3</div>
+                    <div class="step-text"><strong>Double-click</strong> to finish and start analysis.</div>
+                </div>
             </div>
-        </div>
-        <div class="risk-card" id="card-landslide">
-            <div class="card-icon"><i class="fas fa-mountain"></i></div>
-            <div class="card-data">
-                <span class="card-title">LANDSLIDE</span>
-                <span class="card-value" id="val-landslide">--%</span>
-                <span class="card-sub"><span id="label-landslide">Peak</span> <span id="peak-landslide">--%</span> <i id="info-landslide" class="fas fa-info-circle" style="display:none; cursor:help;"></i></span>
+
+            <!-- 2. LOADING PANEL -->
+            <div id="loading-panel" class="panel">
+                <div class="loader-container">
+                    <div class="spinner"></div>
+                    <h3>Analyzing Satellite Images</h3>
+                    <div id="loading-factors">
+                        <p><i class="fas fa-water"></i> Analyzing flood probability...</p>
+                        <p><i class="fas fa-mountain"></i> Calculating landslide risk...</p>
+                        <p><i class="fas fa-leaf"></i> Measuring vegetation health...</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="risk-card" id="card-agri">
-            <div class="card-icon"><i class="fas fa-seedling"></i></div>
-            <div class="card-data">
-                <span class="card-title">AGRICULTURE</span>
-                <span class="card-value" id="val-agri">--%</span>
-                <span class="card-sub"><span id="label-agri">Peak</span> <span id="peak-agri">--%</span></span>
+
+            <!-- 3. RESULTS PANEL -->
+            <div id="results-panel" class="panel">
+                <h2>Analysis Results</h2>
+                <div id="location-badge" class="badge">Sunsari District · Bhumi_Full_Production_Final</div>
+                <div id="confidence-badge" class="confidence-badge">-- confidence</div>
+                <div id="warning-banner" class="warning-banner" style="display:none;"></div>
+
+                <div class="risk-grid">
+                    <div class="risk-card" id="card-flood">
+                        <div class="card-icon"><i class="fas fa-water"></i></div>
+                        <div class="card-data">
+                            <span class="card-title">FLOOD</span>
+                            <span class="card-value" id="val-flood">--%</span>
+                            <span class="card-sub"><span id="label-flood">Peak</span> <span id="peak-flood">--%</span></span>
+                        </div>
+                    </div>
+                    <div class="risk-card" id="card-landslide">
+                        <div class="card-icon"><i class="fas fa-mountain"></i></div>
+                        <div class="card-data">
+                            <span class="card-title">LANDSLIDE</span>
+                            <span class="card-value" id="val-landslide">--%</span>
+                            <span class="card-sub"><span id="label-landslide">Peak</span> <span id="peak-landslide">--%</span> <i id="info-landslide" class="fas fa-info-circle" style="display:none; cursor:help;"></i></span>
+                        </div>
+                    </div>
+                    <div class="risk-card" id="card-agri">
+                        <div class="card-icon"><i class="fas fa-seedling"></i></div>
+                        <div class="card-data">
+                            <span class="card-title">AGRICULTURE</span>
+                            <span class="card-value" id="val-agri">--%</span>
+                            <span class="card-sub"><span id="label-agri">Peak</span> <span id="peak-agri">--%</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3><i class="fas fa-chart-bar"></i> Technical Details</h3>
+                <div class="tech-grid">
+                    <div class="tech-item"><span class="tech-label">Slope</span><span class="tech-val" id="tech-slope">--°</span></div>
+                    <div class="tech-item"><span class="tech-label">Elevation</span><span class="tech-val" id="tech-elev">-- m</span></div>
+                    <div class="tech-item"><span class="tech-label">LULC</span><span class="tech-val" id="tech-lulc">--</span></div>
+                    <div class="tech-item" style="align-items:flex-start;">
+                        <span class="tech-label">NDVI (wet / Δ)</span>
+                        <div style="text-align:right;">
+                            <span class="tech-val" id="tech-ndvi">--</span>
+                            <div id="tech-ndvi-sub" style="font-size:0.7rem;color:#666;font-weight:normal;display:none;margin-top:2px;">wet season / crop signal</div>
+                        </div>
+                    </div>
+                    <div class="tech-item"><span class="tech-label">Soil Clay</span><span class="tech-val" id="tech-clay">--%</span></div>
+                    <div class="tech-item"><span class="tech-label">Rainfall</span><span class="tech-val" id="tech-rain">-- mm</span></div>
+                    <div class="tech-item"><span class="tech-label">TWI</span><span class="tech-val" id="tech-twi">--</span></div>
+                    <div class="tech-item"><span class="tech-label">SPI</span><span class="tech-val" id="tech-spi">--</span></div>
+                    <div class="tech-item"><span class="tech-label">River Distance</span><span class="tech-val" id="tech-river">-- m</span></div>
+                </div>
+
+                <div id="premium-section">
+                    <h3><i class="fas fa-file-alt"></i> Risk Summary</h3>
+                    <div id="summary-content"></div>
+                </div>
+
+                <div class="action-buttons" style="flex-direction:column;gap:0.8rem;">
+                    <div id="unlocked-buttons" style="display:none;gap:0.8rem;width:100%;flex-direction:column;">
+                        <button class="btn-action btn-download-pdf" id="btn-download-report" onclick="downloadReport()" style="width:100%;">
+                            <span class="btn-icon">📄</span>
+                            <span class="btn-label">Download Due Diligence Report</span>
+                        </button>
+                        <button class="btn-action btn-chat-land" id="btn-chat-land" onclick="openChat()" style="width:100%;">
+                            <span class="btn-icon">💬</span>
+                            <span class="btn-label">Chat About Land</span>
+                        </button>
+                    </div>
+                    <button class="btn-action" id="btn-unlock-premium" onclick="window.showPaywall('premium')"
+                        style="width:100%;background:linear-gradient(135deg,#FFD700,#DAA520);color:#000;font-weight:bold;border:none;box-shadow:0 4px 15px rgba(218,165,32,0.4);">
+                        <span class="btn-icon">🔒</span>
+                        <span class="btn-label">Unlock Premium Report & Chat (Rs 1500)</span>
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
-    <!-- Technical Details Table -->
-    <h3><i class="fas fa-chart-bar"></i> Technical Details</h3>
-    <div class="tech-grid">
-        <div class="tech-item">
-            <span class="tech-label">Slope</span>
-            <span class="tech-val" id="tech-slope">--°</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">Elevation</span>
-            <span class="tech-val" id="tech-elev">-- m</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">LULC</span>
-            <span class="tech-val" id="tech-lulc">--</span>
-        </div>
-        <div class="tech-item" style="align-items: flex-start;">
-            <span class="tech-label">NDVI (wet / Δ)</span>
-            <div style="text-align: right;">
-                <span class="tech-val" id="tech-ndvi">--</span>
-                <div id="tech-ndvi-sub" style="font-size: 0.7rem; color: #666; font-weight: normal; display: none; margin-top: 2px;">wet season / crop signal</div>
+
+            <!-- Chat Panel -->
+            <div id="chat-panel" style="display:none;">
+                <h3>💬 Ask About Your Land</h3>
+                <div id="chat-messages">
+                    <div class="chat-msg bot-msg">
+                        Hi! I'm your land analysis assistant. Ask me anything about your plot — flood risk, farming potential, construction safety, and more.
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="e.g. Is this land safe to build a house?"
+                        onkeydown="if(event.key==='Enter') sendChatMessage()" />
+                    <button class="btn-send" onclick="sendChatMessage()">➤</button>
+                </div>
             </div>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">Soil Clay</span>
-            <span class="tech-val" id="tech-clay">--%</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">Rainfall</span>
-            <span class="tech-val" id="tech-rain">-- mm</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">TWI</span>
-            <span class="tech-val" id="tech-twi">--</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">SPI</span>
-            <span class="tech-val" id="tech-spi">--</span>
-        </div>
-        <div class="tech-item">
-            <span class="tech-label">River Distance</span>
-            <span class="tech-val" id="tech-river">-- m</span>
-        </div>
-    </div>
-    
 
-    <!-- AI Summary Section -->
-    <div id="premium-section">
-        <h3><i class="fas fa-file-alt"></i> Risk Summary</h3>
-        <div id="summary-content">
-        
-        </div>
-    </div>
+            <!-- Paywall Modal -->
+            <div id="paywall-modal" class="paywall-overlay" style="display:none;">
+                <div class="paywall-card">
+                    <button class="paywall-close" onclick="closePaywall()">✕</button>
+                    <div class="paywall-icon">💬</div>
+                    <h2>Chat About Your Land</h2>
+                    <p class="paywall-desc">Get unlimited AI-powered answers about your land's risk factors, farming potential, construction viability, and more.</p>
+                    <div class="paywall-features">
+                        <div class="paywall-feature">✅ Ask unlimited questions</div>
+                        <div class="paywall-feature">✅ Factor relationship explanations</div>
+                        <div class="paywall-feature">✅ Personalized recommendations</div>
+                    </div>
+                    <div class="paywall-price">
+                        <span class="price-amount">Rs 1,500</span>
+                        <span class="price-label">one-time payment</span>
+                    </div>
+                    <button class="btn-pay" onclick="processPayment()">💳 Pay & Unlock (Rs 1500)</button>
+                    <p class="paywall-note">Secure payment • Instant access</p>
+                </div>
+            </div>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons" style="flex-direction: column; gap: 0.8rem;">
-        <!-- Unlocked Buttons (Hidden Initially) -->
-        <div id="unlocked-buttons" style="display: none; gap: 0.8rem; width: 100%; flex-direction: column;">
-            <button class="btn-action btn-download-pdf" id="btn-download-report" onclick="downloadReport()" style="width: 100%;">
-                <span class="btn-icon">📄</span>
-                <span class="btn-label">Download Due Diligence Report</span>
-            </button>
-            <button class="btn-action btn-chat-land" id="btn-chat-land" onclick="openChat()" style="width: 100%;">
-                <span class="btn-icon">💬</span>
-                <span class="btn-label">Chat About Land</span>
-            </button>
-        </div>
+        </div><!-- end sidebar -->
+    </div><!-- end content -->
 
-        <!-- Unlock Button (Visible Initially) -->
-        <button class="btn-action" id="btn-unlock-premium" onclick="window.showPaywall('premium')"
-            style="width: 100%; background: linear-gradient(135deg, #FFD700, #DAA520); color: #000; font-weight: bold; border: none; box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);">
-            <span class="btn-icon">🔒</span>
-            <span class="btn-label">Unlock Premium Report & Chat (Rs 1500)</span>
-        </button>
-    </div>
-
-</div>
-
-<!-- Chat Panel (hidden until unlocked) -->
-<div id="chat-panel" style="display:none;">
-    <h3>💬 Ask About Your Land</h3>
-    <div id="chat-messages">
-        <div class="chat-msg bot-msg">
-            Hi! I'm your land analysis assistant. Ask me anything about your plot — flood risk, farming
-            potential, construction safety, and more.
-        </div>
-    </div>
-    <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="e.g. Is this land safe to build a house?"
-            onkeydown="if(event.key==='Enter') sendChatMessage()" />
-        <button class="btn-send" onclick="sendChatMessage()">➤</button>
-    </div>
-</div>
-
-<!-- Paywall Modal -->
-<div id="paywall-modal" class="paywall-overlay" style="display:none;">
-    <div class="paywall-card">
-        <button class="paywall-close" onclick="closePaywall()">✕</button>
-        <div class="paywall-icon">💬</div>
-        <h2>Chat About Your Land</h2>
-        <p class="paywall-desc">Get unlimited AI-powered answers about your land's risk factors, farming
-            potential, construction viability, and more.</p>
-        <div class="paywall-features">
-            <div class="paywall-feature">✅ Ask unlimited questions</div>
-            <div class="paywall-feature">✅ Factor relationship explanations</div>
-            <div class="paywall-feature">✅ Personalized recommendations</div>
-        </div>
-        <div class="paywall-price">
-            <span class="price-amount">Rs 1,500</span>
-            <span class="price-label">one-time payment</span>
-        </div>
-        <button class="btn-pay" onclick="processPayment()">
-            💳 Pay & Unlock (Rs 1500)
-        </button>
-        <p class="paywall-note">Secure payment • Instant access</p>
-    </div>
-</div>
-</div>
-    </div>
+    <!-- JavaScript Files -->
+    <script src="js/map.js?v=3"></script>
+    <script src="js/draw.js?v=3"></script>
+    <script src="js/api.js?v=3"></script>
 
 </body>
 
