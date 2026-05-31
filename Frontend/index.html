@@ -27,11 +27,11 @@
 
     <div id="content">
         <div id="map"></div>
-        <!-- Inside <div id="sidebar"> — replace the empty sidebar div -->
+        
 
 <div id="sidebar">
 
-    <!-- 1. INSTRUCTIONS PANEL (Initial State) -->
+    
     <div id="instructions-panel" class="panel active">
         <h2><i class="fas fa-map-marked-alt"></i> How to Analyze</h2>
         <div class="step-card">
@@ -47,6 +47,18 @@
             <div class="step-text"><strong>Double-click</strong> to finish and start analysis.</div>
         </div>
     </div>
+    <!-- 2. LOADING PANEL -->
+<div id="loading-panel" class="panel">
+    <div class="loader-container">
+        <div class="spinner"></div>
+        <h3>Analyzing Satellite Images</h3>
+        <div id="loading-factors">
+            <p><i class="fas fa-water"></i> Analyzing flood probability...</p>
+            <p><i class="fas fa-mountain"></i> Calculating landslide risk...</p>
+            <p><i class="fas fa-leaf"></i> Measuring vegetation health...</p>
+        </div>
+    </div>
+</div>
 
 </div>
     </div>
