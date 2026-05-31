@@ -1,0 +1,21 @@
+# Python
+Backend/venv/
+venv/
+__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
+
+# Credentials & Sensitive Data
+.env
+service-account.json
+
+# System & Temp Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
