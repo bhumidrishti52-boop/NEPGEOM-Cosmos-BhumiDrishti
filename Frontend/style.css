@@ -169,9 +169,7 @@ header {
 }
 
 
-/* ============================================
-   Step 5: Results panel — risk cards + badges
-   ============================================ */
+
 
 .badge {
     background: #27ae60;
@@ -252,3 +250,42 @@ header {
 .risk-card.border-high { border-bottom: 4px solid #dc2626; }
 .risk-card.border-med  { border-bottom: 4px solid #d97706; }
 .risk-card.border-low  { border-bottom: 4px solid #16a34a; }
+
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.tech-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 4px;
+}
+
+.tech-label { color: #666; font-weight: 500; }
+.tech-val   { font-weight: 700; color: #333; }
+
+/* AI Risk Summary */
+#premium-section {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+
+#summary-content {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #444;
+}
+
+#summary-content p      { margin-bottom: 12px; }
+#summary-content strong { color: #2c3e50; }
