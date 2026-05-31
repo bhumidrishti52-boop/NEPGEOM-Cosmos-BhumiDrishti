@@ -110,3 +110,5 @@ async def analyze(request: AnalysisRequest):
                 "sub_label": "Low Confidence Anomaly" if is_anomaly else "Localized Hotspot Risk",
                 "sub_note":  "Represents the highest-risk point within the plot boundary, not the entire land."
             })
+
+            
