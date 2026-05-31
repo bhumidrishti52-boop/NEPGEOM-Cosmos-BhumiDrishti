@@ -146,7 +146,7 @@
     <div id="premium-section">
         <h3><i class="fas fa-file-alt"></i> Risk Summary</h3>
         <div id="summary-content">
-            <!-- AI Summary injected here by api.js -->
+        
         </div>
     </div>
 
@@ -172,6 +172,46 @@
         </button>
     </div>
 
+</div>
+
+<!-- Chat Panel (hidden until unlocked) -->
+<div id="chat-panel" style="display:none;">
+    <h3>💬 Ask About Your Land</h3>
+    <div id="chat-messages">
+        <div class="chat-msg bot-msg">
+            Hi! I'm your land analysis assistant. Ask me anything about your plot — flood risk, farming
+            potential, construction safety, and more.
+        </div>
+    </div>
+    <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="e.g. Is this land safe to build a house?"
+            onkeydown="if(event.key==='Enter') sendChatMessage()" />
+        <button class="btn-send" onclick="sendChatMessage()">➤</button>
+    </div>
+</div>
+
+<!-- Paywall Modal -->
+<div id="paywall-modal" class="paywall-overlay" style="display:none;">
+    <div class="paywall-card">
+        <button class="paywall-close" onclick="closePaywall()">✕</button>
+        <div class="paywall-icon">💬</div>
+        <h2>Chat About Your Land</h2>
+        <p class="paywall-desc">Get unlimited AI-powered answers about your land's risk factors, farming
+            potential, construction viability, and more.</p>
+        <div class="paywall-features">
+            <div class="paywall-feature">✅ Ask unlimited questions</div>
+            <div class="paywall-feature">✅ Factor relationship explanations</div>
+            <div class="paywall-feature">✅ Personalized recommendations</div>
+        </div>
+        <div class="paywall-price">
+            <span class="price-amount">Rs 1,500</span>
+            <span class="price-label">one-time payment</span>
+        </div>
+        <button class="btn-pay" onclick="processPayment()">
+            💳 Pay & Unlock (Rs 1500)
+        </button>
+        <p class="paywall-note">Secure payment • Instant access</p>
+    </div>
 </div>
 </div>
     </div>
