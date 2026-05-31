@@ -17,26 +17,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 import os
 from dotenv import load_dotenv
-load_dotenv()
-"""
-ai_summary.py — Bhumi Drishti AI narrative layer
-=================================================
-Generates LLM-backed summaries and answers user questions about their land
-plot. Strictly follows the band contract for Bhumi_Full_Production_Final:
-
-  • Risk scores  → reported as % to 1 d.p.  (0.734 → "73.4%")
-  • soil_clay    → raw g/kg ÷ 10 → % content (already converted before LLM)
-  • dist_river   → exp(log_val) - 1 → metres  (already converted before LLM)
-  • NDVI (raw)   → NEVER reported; ndvi_wet + ndvi_delta used instead
-  • SPI          → closer to 0 means HIGHER erosion risk
-  • Anomaly flag → surfaces a data quality warning
-  • LOW conf.    → mandatory 60 m buffer caveat force-appended
-"""
-
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -63,46 +43,6 @@ RULES (follow exactly, no exceptions):
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _pct(v: float) -> str:
-    """Convert decimal to percentage string (1 d.p.)"""
-    return f"{v * 100:.1f}%"
-"""
-ai_summary.py — Bhumi Drishti AI narrative layer
-=================================================
-Generates LLM-backed summaries and answers user questions about their land
-plot. Strictly follows the band contract for Bhumi_Full_Production_Final.
-"""
-
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# ── Mandatory caveat — verbatim per contract ───────────────────────────────────
-LOW_CONFIDENCE_CAVEAT = (
-    "Score derived from a 60 m buffer around the plot centroid. The parcel "
-    "is smaller than one 30 m satellite pixel. Results are indicative only; "
-    "on-site verification is recommended before any land-use decision."
-)
-
-# ── Shared formatting rules ────────────────────────────────────────────────────
-_BASE_RULES = """\
-RULES (follow exactly, no exceptions):
-- Plain prose only. No markdown, no bullets, no headers.
-- Risk scores to 1 decimal place (e.g. "73.4%"). Never round to whole numbers.
-- Never mention raw NDVI or values 0.405–0.411. Reference ndvi_wet and ndvi_delta only.
-- soil_clay and dist_river are pre-converted — report % and metres as given.
-- SPI: a value closer to 0 means higher stream-power / erosion risk.
-- No filler openers ("This analysis shows", "It is important to note", "Based on the data").
-- Never invent values — every number must come from the PLOT DATA block below.\
-"""
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _pct(v: float) -> str:
-    """Convert decimal to percentage string (1 d.p.)"""
     return f"{v * 100:.1f}%"
 
 
@@ -181,51 +121,6 @@ def _build_context_block(data: dict) -> str:
         lines += ["", "WARNINGS"] + [f"  ⚠ {w}" for w in warnings]
 
     return "\n".join(lines)
-"""
-ai_summary.py — Bhumi Drishti AI narrative layer
-=================================================
-Generates LLM-backed summaries and answers user questions about their land
-plot. Strictly follows the band contract for Bhumi_Full_Production_Final.
-"""
-
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# ── Mandatory caveat — verbatim per contract ───────────────────────────────────
-LOW_CONFIDENCE_CAVEAT = (
-    "Score derived from a 60 m buffer around the plot centroid. The parcel "
-    "is smaller than one 30 m satellite pixel. Results are indicative only; "
-    "on-site verification is recommended before any land-use decision."
-)
-
-# ── Shared formatting rules ────────────────────────────────────────────────────
-_BASE_RULES = """\
-RULES (follow exactly, no exceptions):
-- Plain prose only. No markdown, no bullets, no headers.
-- Risk scores to 1 decimal place (e.g. "73.4%"). Never round to whole numbers.
-- Never mention raw NDVI or values 0.405–0.411. Reference ndvi_wet and ndvi_delta only.
-- soil_clay and dist_river are pre-converted — report % and metres as given.
-- SPI: a value closer to 0 means higher stream-power / erosion risk.
-- No filler openers ("This analysis shows", "It is important to note", "Based on the data").
-- Never invent values — every number must come from the PLOT DATA block below.\
-"""
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _pct(v: float) -> str:
-    """Convert decimal to percentage string (1 d.p.)"""
-    return f"{v * 100:.1f}%"
-
-
-def _build_context_block(data: dict) -> str:
-    """Converts the services.py output dict into a readable context block."""
-    # (context building code from previous commit...)
-    pass
 
 
 def _init_llm():
@@ -237,62 +132,6 @@ def _init_llm():
     return ChatOpenAI(
         model="gpt-3.5-turbo",
         temperature=0.3,          # lowered from 0.5 → tighter, more factual output
-        api_key=api_key,
-        **({'base_url': base_url} if base_url else {})
-    )
-"""
-ai_summary.py — Bhumi Drishti AI narrative layer
-=================================================
-Generates LLM-backed summaries and answers user questions about their land
-plot. Strictly follows the band contract for Bhumi_Full_Production_Final.
-"""
-
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# ── Constants and Helpers ──────────────────────────────────────────────────────
-
-LOW_CONFIDENCE_CAVEAT = (
-    "Score derived from a 60 m buffer around the plot centroid. The parcel "
-    "is smaller than one 30 m satellite pixel. Results are indicative only; "
-    "on-site verification is recommended before any land-use decision."
-)
-
-_BASE_RULES = """\
-RULES (follow exactly, no exceptions):
-- Plain prose only. No markdown, no bullets, no headers.
-- Risk scores to 1 decimal place (e.g. "73.4%"). Never round to whole numbers.
-- Never mention raw NDVI or values 0.405–0.411. Reference ndvi_wet and ndvi_delta only.
-- soil_clay and dist_river are pre-converted — report % and metres as given.
-- SPI: a value closer to 0 means higher stream-power / erosion risk.
-- No filler openers ("This analysis shows", "It is important to note", "Based on the data").
-- Never invent values — every number must come from the PLOT DATA block below.\
-"""
-
-def _pct(v: float) -> str:
-    """Convert decimal to percentage string (1 d.p.)"""
-    return f"{v * 100:.1f}%"
-
-
-def _build_context_block(data: dict) -> str:
-    """Converts the services.py output dict into a readable context block."""
-    # (Context building implementation...)
-    pass
-
-
-def _init_llm():
-    """Initialise LangChain LLM. Returns None if API key is absent."""
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        return None
-    base_url = "https://openrouter.ai/api/v1" if api_key.startswith("sk-or-") else None
-    return ChatOpenAI(
-        model="gpt-3.5-turbo",
-        temperature=0.3,
         api_key=api_key,
         **({'base_url': base_url} if base_url else {})
     )
@@ -366,3 +205,44 @@ All numbers come from the GEE asset Bhumi_Full_Production_Final — never invent
 
     except Exception as e:
         return f"Error generating summary: {e}"
+
+
+def chat_about_land(question: str, data: dict) -> str:
+    """
+    Answers a user question about their specific plot using full analysis
+    data as context. Respects all band-contract response rules.
+    """
+    llm = _init_llm()
+    if llm is None:
+        return "⚠️ OPENAI_API_KEY missing — add it to your .env file."
+
+    context    = _build_context_block(data)
+    confidence = data.get('confidence', 'UNKNOWN')
+
+    low_caveat_reminder = (
+        f'\nRemind the user (verbatim, at the end): "{LOW_CONFIDENCE_CAVEAT}"'
+        if confidence == 'LOW' else ''
+    )
+
+    prompt_text = f"""You are a knowledgeable local advisor talking directly to a farmer or landowner about their land.
+All values come from the GEE asset Bhumi_Full_Production_Final — never invent numbers.
+
+{_BASE_RULES}
+- Tone: Direct, active voice, local advisor. Never say "Sunsari district" — always say "this plot" or "your land".
+- Answer in 2–3 sentences. Explain factor relationships only when directly relevant.
+- If the question is outside the scope of the plot data, say so clearly.{low_caveat_reminder}
+
+{context}
+
+USER QUESTION: {question}"""
+
+    try:
+        result = llm.invoke([HumanMessage(content=prompt_text)]).content.strip()
+
+        if confidence == 'LOW' and LOW_CONFIDENCE_CAVEAT not in result:
+            result += f"\n\n{LOW_CONFIDENCE_CAVEAT}"
+
+        return result
+
+    except Exception as e:
+        return f"Error: {e}"
