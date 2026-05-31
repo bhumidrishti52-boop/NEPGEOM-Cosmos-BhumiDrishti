@@ -144,3 +144,28 @@ def generate_pdf_report(analysis_data: dict) -> io.BytesIO:
         "They indicate localized hotspots where risk is highest.</i>",
         ParagraphStyle('Note', parent=body_style, fontSize=9, textColor=HexColor('#6b7280'))
     ))
+
+    elements.append(Paragraph("Technical Details", heading_style))
+
+    tech_data = [
+        ['Parameter', 'Value', 'Parameter', 'Value'],
+        ['Slope', f"{_safe(details.get('slope'))}\u00b0", 'Elevation', f"{_safe(details.get('elevation'), 0)} m"],
+        ['Land Use', str(details.get('lulc', 'Unknown')), 'Soil Clay', f"{_safe(details.get('soil_clay_pct'))}%"],
+        ['Rainfall', f"{_safe(details.get('rainfall'), 0)} mm", 'TWI', _safe(details.get('twi'), 2)],
+        ['SPI', _safe(details.get('spi'), 3), 'River Dist.', f"{details.get('dist_river_m', '--')} m"],
+        ['NDVI-wet', _safe(details.get('ndvi_wet'), 3), 'NDVI-\u0394', _safe(details.get('ndvi_delta'), 3)],
+    ]
+
+    tech_table = Table(tech_data, colWidths=[80, 80, 80, 80])
+    tech_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#f3f4f6')),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#e5e7eb')),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('ALIGN', (3, 0), (3, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+    ]))
+    elements.append(tech_table)
