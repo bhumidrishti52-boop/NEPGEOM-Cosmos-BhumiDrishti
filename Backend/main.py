@@ -8,7 +8,14 @@ import ee
 from models import AnalysisRequest
 from services import run_spatial_analysis
 
+from ai_summary import generate_risk_summary, chat_about_land
+from pdf_report import generate_pdf_report
+from dotenv import load_dotenv
+
 from fastapi.staticfiles import StaticFiles
+load_dotenv()
+
+print("startup environment OPENAI_API_KEY=", os.environ.get("OPENAI_API_KEY"))
 
 app=FastAPI()
 
@@ -202,3 +209,41 @@ async def analyze(request: AnalysisRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/generate-report")
+async def generate_report(request: ReportRequest):
+    """Generate and stream a Due Diligence PDF report."""
+    try:
+        pdf_buffer = generate_pdf_report(request.analysis_data)
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=bhumi_drishti_report.pdf"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
+
+
+@app.post("/chat-land")
+async def chat_land(request: ChatRequest):
+    """Answer user questions about their analyzed land plot."""
+    try:
+        answer = chat_about_land(request.question, request.land_data)
+        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import sys
+    print(f"DEBUG: Python: {sys.executable}")
+    print("DEBUG: Starting server on port 8081...")
+    uvicorn.run("main:app", host="127.0.0.1", port=8081, reload=True)
+
+
+# Mount Frontend at the end to avoid overriding API routes
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent  # goes up to project root
+app.mount("/", StaticFiles(directory=BASE_DIR / "Frontend", html=True), name="frontend")
