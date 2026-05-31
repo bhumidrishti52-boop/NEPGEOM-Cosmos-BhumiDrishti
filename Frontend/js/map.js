@@ -33,3 +33,40 @@ map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 map.on('load', () => {
     map.fitBounds(bounds, { padding: 50, linear: true });
 });
+
+// ----------------------
+// GPS "Locate Me" Function
+// ----------------------
+function locateMe() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            console.log("User location:", lat, lng);
+
+            // Fly map to user location
+            map.flyTo({ center: [lng, lat], zoom: 15 });
+
+            // Remove previous marker if exists
+            if (window.userMarker) {
+                window.userMarker.remove();
+            }
+
+            // Add marker at user location
+            window.userMarker = new maplibregl.Marker({ color: "red" })
+                .setLngLat([lng, lat])
+                .setPopup(new maplibregl.Popup().setText("Your Location"))
+                .addTo(map);
+        },
+        (error) => {
+            alert("Error getting location: " + error.message);
+        },
+        { enableHighAccuracy: true }
+    );
+}
