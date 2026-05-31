@@ -1,7 +1,6 @@
-// Update this URL if deploying or using a different tunnel
 const BACKEND_URL = '/analyze-plot';
 
-// Track the latest geometry drawn so we can re-request analysis
+
 let lastGeometry = null;
 
 // UI Helper Functions
@@ -366,3 +365,66 @@ function processPayment() {
         // Just let them click.
     }, 1500);
 }
+
+// ----------------------
+// Chat Messaging
+// ----------------------
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const messagesEl = document.getElementById('chat-messages');
+
+    // Add user message
+    const userDiv = document.createElement('div');
+    userDiv.className = 'chat-msg user-msg';
+    userDiv.textContent = question;
+    messagesEl.appendChild(userDiv);
+
+    input.value = '';
+
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-msg typing-msg';
+    typingDiv.textContent = 'Thinking...';
+    messagesEl.appendChild(typingDiv);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    try {
+        const response = await fetch('/chat-land', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: question,
+                land_data: lastRawStats || {}
+            })
+        });
+
+        const data = await response.json();
+
+        // Replace typing with answer
+        typingDiv.className = 'chat-msg bot-msg';
+        typingDiv.textContent = data.answer || 'Sorry, I could not generate a response.';
+
+    } catch (err) {
+        console.error('Chat error:', err);
+        typingDiv.className = 'chat-msg bot-msg';
+        typingDiv.textContent = '⚠️ Error getting response. Please try again.';
+    }
+
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// ----------------------
+// Expose functions for other modules
+// ----------------------
+window.resetUI = function () {
+    showPanel('instructions-panel');
+    document.getElementById('chat-panel').style.display = 'none';
+};
+window.downloadReport = downloadReport;
+window.openChat = openChat;
+window.closePaywall = closePaywall;
+window.processPayment = processPayment;
+window.sendChatMessage = sendChatMessage;
