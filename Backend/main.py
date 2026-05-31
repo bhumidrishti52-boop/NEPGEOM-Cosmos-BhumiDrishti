@@ -111,4 +111,83 @@ async def analyze(request: AnalysisRequest):
                 "sub_note":  "Represents the highest-risk point within the plot boundary, not the entire land."
             })
 
-            
+        response_payload = {
+            "metadata": {
+                "source":       stats.get('asset_version', 'Bhumi_Full_Production_Final'),
+                "confidence":   confidence,
+                "buffer_tier":  buffer_tier,
+                "buffer_m":     buffer_m,
+                "area_m2":      stats.get('area_m2', None),
+                "null_imputed": stats.get('null_imputed', []),
+                "anomaly_flag": anomaly,
+                "outside_roi":  outside_roi,
+                "terrain_type": terrain_type,
+                "note": (
+                    "Score derived from a 60 m buffer around the plot centroid. "
+                    "The parcel is smaller than one 30 m satellite pixel. Results are indicative only; "
+                    "on-site verification is recommended before any land-use decision."
+                    if confidence == "LOW" else
+                    "Analysis based on Bhumi_Full_Production_Final GEE asset (30 m resolution)."
+                ),
+            },
+            "quantitative_data": {
+                "indicators": [
+                    {
+                        "category":  "flood",
+                        "title":     "Flood Risk",
+                        "value":     _pct(gs('flood_prob', 'mean')),
+                        "sub_value": _pct(gs('flood_prob', 'max')),
+                        "sub_label": "Peak Risk",
+                        "unit":      "%",
+                    },
+                    ls_display,
+                    {
+                        "category":  "agri",
+                        "title":     "Agricultural Suitability",
+                        "value":     _pct(gs('agri_prob', 'mean')),
+                        "sub_value": _pct(gs('agri_prob', 'max')),
+                        "sub_label": "Peak Suitability",
+                        "unit":      "%",
+                    },
+                ],
+                "details": {
+                    # Terrain
+                    "slope":          gs('slope', 'mean'),
+                    "elevation":      gs('elevation', 'mean'),
+                    "slope_std":      stats.get('slope_std', 0),
+                    "curvature":      stats.get('curvature', 0),
+
+                    # LULC
+                    "lulc":           stats.get('lulc', {}).get('label', 'Unknown'),
+                    "lulc_code":      stats.get('lulc', {}).get('code', None),
+
+                    # Vegetation — NDVI raw intentionally omitted per contract
+                    "ndvi_wet":       gs('vegetation', 'ndvi_wet'),
+                    "ndvi_delta":     gs('vegetation', 'ndvi_delta'),
+                    "ndvi_note":      "vegetation index data not discriminating in this area; ndvi_wet and ndvi_delta used by model instead.",
+
+                    # Soil
+                    "soil_clay_pct":  stats.get('soil_clay', {}).get('percentage', 0),
+
+                    # Climate
+                    "rainfall":       gs('rainfall', 'annual_mm'),
+
+                    # Hydrology
+                    "twi":            gs('twi', 'mean'),
+                    "spi":            gs('spi', 'mean'),
+                    "spi_label":      stats.get('spi', {}).get('interpretation', ''),
+                    "dist_river_m":   stats.get('dist_river', {}).get('metres', None),
+                    "flow_acc_log":   stats.get('flow_acc_log', 0),
+                },
+                "risk_summary": risk_summary_text,
+            },
+            "raw_stats": stats,
+        }
+
+        print(f"DEBUG: Response payload confidence={confidence}, anomaly={anomaly}")
+        return response_payload
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
