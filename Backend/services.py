@@ -163,3 +163,11 @@ def run_spatial_analysis(geometry_dict: dict) -> dict:
     dist_river_m   = _dist_river_metres(dist_river_log)
 
     flow_acc_log = get_val('flow_acc_log', 'mean')
+
+    outside_roi = not (75 <= elev_mean <= 1267)
+
+    anomaly_flag = (
+        flood_mean == 0.0
+        and ls_mean < 0.04
+        and agri_mean == 0.0
+    )
