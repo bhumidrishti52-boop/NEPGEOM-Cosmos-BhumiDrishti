@@ -17,7 +17,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 import os
 from dotenv import load_dotenv
-ai
 load_dotenv()
 """
 ai_summary.py — Bhumi Drishti AI narrative layer
