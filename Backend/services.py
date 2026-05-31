@@ -117,3 +117,49 @@ def run_spatial_analysis(geometry_dict: dict) -> dict:
         lulc_code = int(lulc_mode_result.get('lulc') or BAND_MEDIANS['lulc'])
     except Exception:
         lulc_code = int(BAND_MEDIANS['lulc'])
+
+    _null_imputed_set: set = set()
+
+    def get_val(band: str, stat: str) -> float:
+        key = f"{band}_{stat}"
+        v = stats.get(key)
+        if v is None:
+            _null_imputed_set.add(band)  
+            return BAND_MEDIANS.get(band, 0.0)
+        return float(v)
+
+    flood_mean   = get_val('flood_risk', 'mean')
+    flood_max    = get_val('flood_risk', 'max')
+
+    ls_mean      = get_val('landslide_risk', 'mean')
+    ls_max       = get_val('landslide_risk', 'max')
+
+    agri_mean    = get_val('agri_suitability', 'mean')
+    agri_max     = get_val('agri_suitability', 'max')
+
+    elev_mean    = get_val('elevation', 'mean')
+    elev_min     = get_val('elevation', 'min')
+    elev_max     = get_val('elevation', 'max')
+
+    slope_mean   = get_val('slope', 'mean')
+    slope_max    = get_val('slope', 'max')
+
+    slope_std    = get_val('slope_std', 'mean')
+    curvature    = get_val('curvature', 'mean')
+
+    ndvi_raw     = get_val('NDVI', 'mean')
+    ndvi_wet     = get_val('ndvi_wet', 'mean')
+    ndvi_delta   = get_val('ndvi_delta', 'mean')
+
+    rain_mean    = get_val('rain', 'mean')
+
+    soil_clay_raw = get_val('soil_clay', 'mean')          
+    soil_clay_pct = _clay_percent(soil_clay_raw)       
+
+    twi_mean     = get_val('twi', 'mean')
+    spi_mean     = get_val('spi', 'mean')
+
+    dist_river_log = get_val('dist_river_log', 'mean')
+    dist_river_m   = _dist_river_metres(dist_river_log)
+
+    flow_acc_log = get_val('flow_acc_log', 'mean')
