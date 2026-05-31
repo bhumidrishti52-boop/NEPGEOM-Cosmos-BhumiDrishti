@@ -38,7 +38,6 @@ def _pct(v: float) -> float:
 
 @app.post("/analyze-plot")
 async def analyze(request: AnalysisRequest):
-    try:
         try:
             coords = request.geometry.get('coordinates', [])[0]
             avg_lon = sum(c[0] for c in coords) / len(coords)
