@@ -34,3 +34,23 @@ LULC_MAP = {
     95: 'Wetland',
     97: 'Other',
 }
+
+def _lulc_label(code: int) -> str:
+    return LULC_MAP.get(int(code), f'Unknown ({code})')
+
+
+def _dist_river_metres(dist_river_log: float) -> int:
+    return round(math.exp(dist_river_log) - 1)
+
+
+def _clay_percent(soil_clay_g_per_kg: float) -> float:
+    return soil_clay_g_per_kg / 10.0
+
+
+def _spi_interpretation(spi: float) -> str:
+    if spi >= -0.40:
+        return 'HIGH (strong stream power / erosion risk)'
+    elif spi >= -0.80:
+        return 'MODERATE'
+    else:
+        return 'LOW'
