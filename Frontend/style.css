@@ -35,3 +35,54 @@ body {
     padding: 24px;
     overflow-y: auto;
 }
+
+header {
+    height: 70px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    background: white;
+    gap: 20px;
+    z-index: 100;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 20px;
+    color: #111827;
+}
+
+.btn {
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.btn:hover { opacity: 0.9; }
+
+.btn-draw {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+.btn-clear {
+    background: #fee2e2;
+    color: #991b1b;
+    border: none;
+}
+
+.btn-gps {
+    background: #16a34a;
+    color: white;
+    border: none;
+}
+
+.btn-gps:hover { opacity: 0.9; }
