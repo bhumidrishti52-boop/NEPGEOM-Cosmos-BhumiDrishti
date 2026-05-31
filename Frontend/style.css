@@ -127,3 +127,128 @@ header {
     margin-right: 12px;
     flex-shrink: 0;
 }
+
+
+
+.loader-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loading-factors p {
+    text-align: left;
+    margin: 8px 0;
+    color: #555;
+    font-size: 0.95rem;
+    opacity: 0;
+    animation: slideIn 0.5s forwards;
+}
+
+#loading-factors p:nth-child(1) { animation-delay: 0.5s; }
+#loading-factors p:nth-child(2) { animation-delay: 1.5s; }
+#loading-factors p:nth-child(3) { animation-delay: 2.5s; }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+
+/* ============================================
+   Step 5: Results panel — risk cards + badges
+   ============================================ */
+
+.badge {
+    background: #27ae60;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.confidence-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+    margin-left: 6px;
+}
+
+.conf-high   { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.conf-medium { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+.conf-low    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+.warning-banner {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: #78350f;
+    line-height: 1.5;
+}
+
+.warn-line { margin-bottom: 4px; }
+.warn-line:last-child { margin-bottom: 0; }
+
+/* Risk cards grid */
+.risk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.risk-card {
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.risk-card:hover { transform: translateY(-2px); }
+
+.card-icon  { font-size: 1.2rem; margin-bottom: 8px; color: #555; }
+.card-title { display: block; font-size: 0.7rem; font-weight: 700; color: #888; margin-bottom: 4px; }
+.card-value { display: block; font-size: 1.4rem; font-weight: 800; color: #2c3e50; }
+.card-sub   { display: block; font-size: 0.7rem; color: #999; }
+
+/* Static per-card colors */
+#card-flood     .card-value { color: #3498db; }
+#card-landslide .card-value { color: #e74c3c; }
+#card-agri      .card-value { color: #27ae60; }
+
+/* Dynamic risk classes (injected by JS) */
+.risk-high { color: #dc2626 !important; }
+.risk-med  { color: #d97706 !important; }
+.risk-low  { color: #16a34a !important; }
+
+.risk-card.border-high { border-bottom: 4px solid #dc2626; }
+.risk-card.border-med  { border-bottom: 4px solid #d97706; }
+.risk-card.border-low  { border-bottom: 4px solid #16a34a; }
