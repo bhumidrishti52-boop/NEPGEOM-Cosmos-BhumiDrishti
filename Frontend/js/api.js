@@ -237,3 +237,132 @@ function renderResults(data) {
         document.getElementById('summary-content').innerText = '⚠️ Error displaying results.';
     }
 }
+
+// ----------------------
+// Store last analysis data for PDF/Chat
+// ----------------------
+let lastAnalysisData = null;
+let lastRawStats = null;
+
+// ----------------------
+// PDF Download
+// ----------------------
+async function downloadReport() {
+    if (!lastAnalysisData) {
+        alert('Please analyze a plot first.');
+        return;
+    }
+
+    // Gated Check
+    if (!window.isPlotUnlocked) {
+        showPaywall('report');
+        return;
+    }
+
+    const btn = document.getElementById('btn-download-report');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">Generating PDF...</span>';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/generate-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ analysis_data: lastAnalysisData })
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bhumi_drishti_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.innerHTML = '<span class="btn-icon">✅</span><span class="btn-label">Downloaded!</span>';
+        setTimeout(() => { btn.innerHTML = origHTML; btn.disabled = false; }, 2000);
+
+    } catch (err) {
+        console.error('PDF download error:', err);
+        alert('⚠️ Failed to generate report.');
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
+
+// ----------------------
+// Chat About Land — Paywall
+// ----------------------
+function openChat() {
+    if (!lastAnalysisData) {
+        alert('Please analyze a plot first.');
+        return;
+    }
+
+    // Gated Check
+    if (!window.isPlotUnlocked) {
+        showPaywall('chat');
+        return;
+    }
+
+    document.getElementById('chat-panel').style.display = 'block';
+    document.getElementById('chat-input').focus();
+}
+
+function showPaywall(feature) {
+    const modal = document.getElementById('paywall-modal');
+    modal.style.display = 'flex';
+
+    const title = document.querySelector('.paywall-card h2');
+    const desc = document.querySelector('.paywall-desc');
+
+    if (feature === 'report') {
+        title.innerText = "Unlock Detailed Report";
+        desc.innerText = "Get a comprehensive Due Diligence PDF report for this specific plot.";
+    } else if (feature === 'chat') {
+        title.innerText = "Chat About This Plot";
+        desc.innerText = "Ask unlimited questions about risks and potential for this specific plot.";
+    } else {
+        // "premium" or default
+        title.innerText = "Unlock Premium Features";
+        desc.innerText = "Get a detailed Due Diligence Report (PDF) AND unlimited AI Chat for this specific plot.";
+    }
+}
+
+function closePaywall() {
+    document.getElementById('paywall-modal').style.display = 'none';
+}
+
+function processPayment() {
+    // Mock payment flow
+    const payBtn = document.querySelector('.btn-pay');
+    payBtn.innerHTML = '⏳ Processing...';
+    payBtn.disabled = true;
+
+    setTimeout(() => {
+        // Unlock THIS plot
+        window.isPlotUnlocked = true;
+
+        document.getElementById('paywall-modal').style.display = 'none';
+
+        // Update UI: Hide "Unlock", Show "Action" buttons
+        const unlockBtn = document.getElementById('btn-unlock-premium');
+        if (unlockBtn) unlockBtn.style.display = 'none';
+
+        const unlockedDiv = document.getElementById('unlocked-buttons');
+        if (unlockedDiv) unlockedDiv.style.display = 'flex'; // or block
+
+        // Reset pay button for future
+        payBtn.innerHTML = '💳 Pay & Unlock (Rs 1500)';
+        payBtn.disabled = false;
+
+        alert("Payment Successful! Features unlocked for this plot.");
+
+        // Auto-open chat if they were trying to chat? Or let them click?
+        // Just let them click.
+    }, 1500);
+}
