@@ -289,3 +289,133 @@ header {
 
 #summary-content p      { margin-bottom: 12px; }
 #summary-content strong { color: #2c3e50; }
+
+
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.btn-download-pdf {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.btn-download-pdf:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.btn-chat-land {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+}
+
+.btn-chat-land:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+}
+
+.btn-icon   { font-size: 1.2rem; }
+
+.lock-badge {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Paywall overlay */
+.paywall-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.paywall-card {
+    background: white;
+    border-radius: 20px;
+    padding: 36px 32px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.paywall-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    border: none;
+    background: #f3f4f6;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: background 0.2s;
+}
+
+.paywall-close:hover { background: #e5e7eb; }
+
+.paywall-icon      { font-size: 3rem; margin-bottom: 12px; }
+.paywall-card h2   { margin: 0 0 8px; font-size: 1.4rem; color: #111827; }
+.paywall-desc      { color: #6b7280; font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+.paywall-features  { text-align: left; margin: 0 auto 20px; max-width: 260px; }
+.paywall-feature   { padding: 6px 0; font-size: 0.9rem; color: #374151; }
+.paywall-price     { margin-bottom: 16px; }
+.price-amount      { display: block; font-size: 2rem; font-weight: 800; color: #059669; }
+.price-label       { display: block; font-size: 0.8rem; color: #9ca3af; margin-top: 2px; }
+.paywall-note      { margin-top: 12px; font-size: 0.75rem; color: #9ca3af; }
+
+.btn-pay {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+}
+
+.btn-pay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5);
+}
