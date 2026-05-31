@@ -140,6 +140,39 @@
             <span class="tech-val" id="tech-river">-- m</span>
         </div>
     </div>
+    
+
+    <!-- AI Summary Section -->
+    <div id="premium-section">
+        <h3><i class="fas fa-file-alt"></i> Risk Summary</h3>
+        <div id="summary-content">
+            <!-- AI Summary injected here by api.js -->
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons" style="flex-direction: column; gap: 0.8rem;">
+        <!-- Unlocked Buttons (Hidden Initially) -->
+        <div id="unlocked-buttons" style="display: none; gap: 0.8rem; width: 100%; flex-direction: column;">
+            <button class="btn-action btn-download-pdf" id="btn-download-report" onclick="downloadReport()" style="width: 100%;">
+                <span class="btn-icon">📄</span>
+                <span class="btn-label">Download Due Diligence Report</span>
+            </button>
+            <button class="btn-action btn-chat-land" id="btn-chat-land" onclick="openChat()" style="width: 100%;">
+                <span class="btn-icon">💬</span>
+                <span class="btn-label">Chat About Land</span>
+            </button>
+        </div>
+
+        <!-- Unlock Button (Visible Initially) -->
+        <button class="btn-action" id="btn-unlock-premium" onclick="window.showPaywall('premium')"
+            style="width: 100%; background: linear-gradient(135deg, #FFD700, #DAA520); color: #000; font-weight: bold; border: none; box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);">
+            <span class="btn-icon">🔒</span>
+            <span class="btn-label">Unlock Premium Report & Chat (Rs 1500)</span>
+        </button>
+    </div>
+
+</div>
 </div>
     </div>
 
