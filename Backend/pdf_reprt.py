@@ -169,3 +169,42 @@ def generate_pdf_report(analysis_data: dict) -> io.BytesIO:
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
     ]))
     elements.append(tech_table)
+
+    elements.append(Paragraph("Factor Relationships", heading_style))
+
+    slope_val = details.get('slope', 0) or 0
+    elev_val  = details.get('elevation', 0) or 0
+    clay_val  = details.get('soil_clay_pct', 0) or 0     # already in %
+    rain_val  = details.get('rainfall', 0) or 0
+    ndvi_wet  = details.get('ndvi_wet', 0) or 0
+    ndvi_delta = details.get('ndvi_delta', 0) or 0
+
+    elements.append(Paragraph(
+        f"<b>Slope + Elevation → Landslide Risk:</b> With a slope of {slope_val:.1f}° and elevation of "
+        f"{elev_val:.0f} m, "
+        f"{'the terrain has significant gradient that increases landslide susceptibility, especially during heavy rains.' if slope_val > 10 else 'the relatively flat terrain reduces landslide risk significantly.'}",
+        body_style
+    ))
+
+    elements.append(Paragraph(
+        f"<b>Soil Clay + Rainfall → Agriculture:</b> Soil clay content at {clay_val:.1f}% "
+        f"{'is in the optimal range (1.5–3.5%) for moisture retention.' if 15 <= clay_val * 10 <= 35 else 'may affect water retention for crops.'} "
+        f"Annual rainfall of {rain_val:.0f} mm {'is adequate for most crops.' if rain_val > 800 else 'is low and irrigation may be needed.'}",
+        body_style
+    ))
+
+    elements.append(Paragraph(
+        f"<b>Vegetation (Seasonal NDVI):</b> Wet-season NDVI of {ndvi_wet:.3f} and "
+        f"seasonal delta (\u0394) of {ndvi_delta:.3f} indicate "
+        f"{'strong crop seasonality — a positive sign for agricultural use.' if ndvi_delta > 0.15 else 'moderate seasonality, typical for mixed cropland.'} "
+        "(Raw annual NDVI is non-informative in this ROI; wet-season and delta values are used by the model.)",
+        body_style
+    ))
+
+    flood_val = flood.get('value', 0)
+    flood_peak = flood.get('sub_value', 0)
+    elements.append(Paragraph(
+        f"<b>Flood Probability:</b> Average flood probability of {flood_val:.0f}% with a peak of {flood_peak:.0f}%. "
+        f"{'The low peak value means even the most vulnerable spot on your plot has minimal flood exposure.' if flood_peak < 20 else 'The elevated peak value indicates specific areas of your plot are more flood-prone and may require drainage solutions.' if flood_peak < 50 else 'The high peak value is a serious concern — parts of your plot have historically experienced significant flooding.'}",
+        body_style
+    ))
