@@ -1,0 +1,37 @@
+    :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --border: #e5e7eb;
+    --success: #dcfce7;
+    --success-text: #166534;
+    --danger: #fee2e2;
+    --danger-text: #991b1b;
+    --bg-gray: #f9fafb;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#map {
+    flex: 1;
+}
+
+#sidebar {
+    width: 380px;
+    border-left: 1px solid #e5e7eb;
+    background: white;
+    padding: 24px;
+    overflow-y: auto;
+}
