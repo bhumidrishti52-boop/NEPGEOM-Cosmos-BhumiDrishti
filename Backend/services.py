@@ -54,3 +54,11 @@ def _spi_interpretation(spi: float) -> str:
         return 'MODERATE'
     else:
         return 'LOW'
+
+def _determine_confidence(area_m2: float):
+    if area_m2 >= 2700:
+        return 'HIGH', 0, 0
+    elif area_m2 >= 900:
+        return 'MEDIUM', 1, 30
+    else:
+        return 'LOW', 2, 60
