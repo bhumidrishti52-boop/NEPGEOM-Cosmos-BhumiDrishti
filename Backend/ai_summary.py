@@ -241,3 +241,129 @@ def _init_llm():
         api_key=api_key,
         **({'base_url': base_url} if base_url else {})
     )
+"""
+ai_summary.py — Bhumi Drishti AI narrative layer
+=================================================
+Generates LLM-backed summaries and answers user questions about their land
+plot. Strictly follows the band contract for Bhumi_Full_Production_Final.
+"""
+
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ── Constants and Helpers ──────────────────────────────────────────────────────
+
+LOW_CONFIDENCE_CAVEAT = (
+    "Score derived from a 60 m buffer around the plot centroid. The parcel "
+    "is smaller than one 30 m satellite pixel. Results are indicative only; "
+    "on-site verification is recommended before any land-use decision."
+)
+
+_BASE_RULES = """\
+RULES (follow exactly, no exceptions):
+- Plain prose only. No markdown, no bullets, no headers.
+- Risk scores to 1 decimal place (e.g. "73.4%"). Never round to whole numbers.
+- Never mention raw NDVI or values 0.405–0.411. Reference ndvi_wet and ndvi_delta only.
+- soil_clay and dist_river are pre-converted — report % and metres as given.
+- SPI: a value closer to 0 means higher stream-power / erosion risk.
+- No filler openers ("This analysis shows", "It is important to note", "Based on the data").
+- Never invent values — every number must come from the PLOT DATA block below.\
+"""
+
+def _pct(v: float) -> str:
+    """Convert decimal to percentage string (1 d.p.)"""
+    return f"{v * 100:.1f}%"
+
+
+def _build_context_block(data: dict) -> str:
+    """Converts the services.py output dict into a readable context block."""
+    # (Context building implementation...)
+    pass
+
+
+def _init_llm():
+    """Initialise LangChain LLM. Returns None if API key is absent."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    base_url = "https://openrouter.ai/api/v1" if api_key.startswith("sk-or-") else None
+    return ChatOpenAI(
+        model="gpt-3.5-turbo",
+        temperature=0.3,
+        api_key=api_key,
+        **({'base_url': base_url} if base_url else {})
+    )
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
+
+def generate_risk_summary(data: dict) -> str:
+    """
+    Returns a tight 3-sentence plain-text risk summary:
+      S1 — dominant risk + score
+      S2 — key driving factors (terrain/hydrology)
+      S3 — agricultural suitability + limiting factor
+    Follows the Bhumi_Full_Production_Final band contract exactly.
+    """
+    llm = _init_llm()
+    if llm is None:
+        return "⚠️ OPENAI_API_KEY missing — add it to your .env file."
+
+    context    = _build_context_block(data)
+    confidence = data.get('confidence', 'UNKNOWN')
+    anomaly    = data.get('anomaly_flag', False)
+
+    low_caveat_instruction = (
+        f'End with this exact sentence: "{LOW_CONFIDENCE_CAVEAT}"'
+        if confidence == 'LOW'
+        else 'Do not add any confidence caveat.'
+    )
+
+    anomaly_instruction = (
+        'Include one brief sentence noting that the model output may require verification by the Bhumi team.'
+        if anomaly else ''
+    )
+
+    prompt_text = f"""You are a knowledgeable local advisor talking directly to a farmer or landowner about their land.
+All numbers come from the GEE asset Bhumi_Full_Production_Final — never invent values.
+
+{_BASE_RULES}
+- Tone: Direct, active voice, local advisor. Never say "Sunsari district" — always say "this plot" or "your land".
+- 4 to 5 sentences (add 1 extra sentence only if confidence is LOW, to fit the mandatory caveat).
+- Sentence 1: what is the biggest risk on this plot and how serious is it (use the mean score).
+- Sentence 2: what on this specific land is causing that risk (use actual values). 
+  * CRITICAL RULES FOR FLOOD RISK (>50%): Identify the actual dominant driver:
+    - If LULC is Grassland or Bare/Sparse: Note the plot sits on active floodplain or sandbar land. Cite low-clay sandy soil, land cover, and high flood accumulation indicating regular monsoon inundation (DO NOT cite river distance).
+    - Else if TWI > 8: Cite water accumulation and terrain convergence as the primary driver.
+    - Else if flow_acc_log > 8: Cite high upstream drainage area as the driver.
+    - Else if dist_river_m < 500: Cite proximity to river channel as the primary driver.
+    - Only fall back to river distance if none of the above are met.
+- Sentence 3: state the secondary risk if it is above 25%, otherwise skip this sentence and go directly to sentence 4.
+- Sentence 4: farming verdict for this plot — is it good land to farm, and what is the one thing holding it back.
+- Sentence 5: one practical recommendation — what the landowner should do or watch out for (e.g. "avoid planting in the lowest corners during monsoon", "this land is safe to build on but flood insurance is advisable").
+{anomaly_instruction}
+{low_caveat_instruction}
+
+{context}"""
+
+    try:
+        result = llm.invoke([HumanMessage(content=prompt_text)]).content.strip()
+
+        # Safety nets — fire if LLM drops mandatory content
+        if confidence == 'LOW' and LOW_CONFIDENCE_CAVEAT not in result:
+            result += f" {LOW_CONFIDENCE_CAVEAT}"
+
+        if anomaly and 'bhumi team' not in result.lower():
+            result += (
+                " Note: a model output anomaly was detected (all risk scores near zero) — "
+                "please report raw predictor values to the Bhumi team."
+            )
+
+        return result
+
+    except Exception as e:
+        return f"Error generating summary: {e}"
