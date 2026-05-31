@@ -182,3 +182,62 @@ def _build_context_block(data: dict) -> str:
         lines += ["", "WARNINGS"] + [f"  ⚠ {w}" for w in warnings]
 
     return "\n".join(lines)
+"""
+ai_summary.py — Bhumi Drishti AI narrative layer
+=================================================
+Generates LLM-backed summaries and answers user questions about their land
+plot. Strictly follows the band contract for Bhumi_Full_Production_Final.
+"""
+
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ── Mandatory caveat — verbatim per contract ───────────────────────────────────
+LOW_CONFIDENCE_CAVEAT = (
+    "Score derived from a 60 m buffer around the plot centroid. The parcel "
+    "is smaller than one 30 m satellite pixel. Results are indicative only; "
+    "on-site verification is recommended before any land-use decision."
+)
+
+# ── Shared formatting rules ────────────────────────────────────────────────────
+_BASE_RULES = """\
+RULES (follow exactly, no exceptions):
+- Plain prose only. No markdown, no bullets, no headers.
+- Risk scores to 1 decimal place (e.g. "73.4%"). Never round to whole numbers.
+- Never mention raw NDVI or values 0.405–0.411. Reference ndvi_wet and ndvi_delta only.
+- soil_clay and dist_river are pre-converted — report % and metres as given.
+- SPI: a value closer to 0 means higher stream-power / erosion risk.
+- No filler openers ("This analysis shows", "It is important to note", "Based on the data").
+- Never invent values — every number must come from the PLOT DATA block below.\
+"""
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _pct(v: float) -> str:
+    """Convert decimal to percentage string (1 d.p.)"""
+    return f"{v * 100:.1f}%"
+
+
+def _build_context_block(data: dict) -> str:
+    """Converts the services.py output dict into a readable context block."""
+    # (context building code from previous commit...)
+    pass
+
+
+def _init_llm():
+    """Initialise LangChain LLM. Returns None if API key is absent."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    base_url = "https://openrouter.ai/api/v1" if api_key.startswith("sk-or-") else None
+    return ChatOpenAI(
+        model="gpt-3.5-turbo",
+        temperature=0.3,          # lowered from 0.5 → tighter, more factual output
+        api_key=api_key,
+        **({'base_url': base_url} if base_url else {})
+    )
