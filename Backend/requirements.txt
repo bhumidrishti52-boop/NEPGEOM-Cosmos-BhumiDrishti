@@ -1,3 +1,5 @@
 fastapi
 uvicorn
+earthengine-api
+python-dotenv
 pydantic
