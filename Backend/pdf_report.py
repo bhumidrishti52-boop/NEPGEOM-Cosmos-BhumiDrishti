@@ -105,21 +105,21 @@ def generate_pdf_report(analysis_data: dict) -> io.BytesIO:
         ['Category', 'Average Risk', 'Peak Risk', 'Assessment'],
         [
             'Flood Risk',
-            f"{flood.get('value', 0):.0f}%",
-            f"{flood.get('sub_value', 0):.0f}%",
-            _risk_label(flood.get('value', 0))
+            f"{flood.get('value', 0) or 0:.0f}%",
+            f"{flood.get('sub_value', 0) or 0:.0f}%",
+            _risk_label(flood.get('value', 0) or 0)
         ],
         [
             'Landslide Risk',
-            f"{landslide.get('value', 0):.0f}%",
-            f"{landslide.get('sub_value', 0):.0f}%",
-            _risk_label(landslide.get('value', 0))
+            f"{landslide.get('value', 0) or 0:.0f}%",
+            f"{landslide.get('sub_value', 0) or 0:.0f}%",  # Fix applied here
+            _risk_label(landslide.get('value', 0) or 0)
         ],
         [
             'Agri Suitability',
-            f"{agri.get('value', 0):.0f}%",
+            f"{agri.get('value', 0) or 0:.0f}%",
             '--',
-            _agri_label(agri.get('value', 0))
+            _agri_label(agri.get('value', 0) or 0)
         ],
     ]
 

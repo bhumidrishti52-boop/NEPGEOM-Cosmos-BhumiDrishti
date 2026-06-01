@@ -212,17 +212,20 @@ async def analyze(request: AnalysisRequest):
     
 @app.post("/generate-report")
 async def generate_report(request: ReportRequest):
-    """Generate and stream a Due Diligence PDF report."""
     try:
+        # 1. Generate the PDF and get the buffer
         pdf_buffer = generate_pdf_report(request.analysis_data)
+        
+        # 2. Return the buffer using the variable name (NOT ...)
         return StreamingResponse(
-            pdf_buffer,
+            pdf_buffer, 
             media_type="application/pdf",
             headers={"Content-Disposition": "attachment; filename=bhumi_drishti_report.pdf"},
         )
     except Exception as e:
+        import traceback
+        traceback.print_exc() 
         raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
-
 
 @app.post("/chat-land")
 async def chat_land(request: ChatRequest):
